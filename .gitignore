@@ -1,0 +1,9 @@
+# Ignorer tout
+*
+
+# Sauf ces fichiers
+!.gitignore 
+!vola 
+!README.md 
+!data/
+!data/data.csv 
