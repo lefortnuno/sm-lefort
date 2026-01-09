@@ -2,8 +2,19 @@
 *
 
 # Sauf ces fichiers
-!.gitignore 
-!vola 
+!.gitignore  
 !README.md 
-!data/
-!data/data.csv 
+!ai-service/
+!ai-service/*
+!chatbot-service/
+!chatbot-service/*
+!chat-service/
+!chat-service/*
+!config-service/
+!config-service/*
+!discovery-service/
+!discovery-service/*
+!gateway-service/
+!gateway-service/*
+!user-service/
+!user-service/*
