@@ -18,3 +18,11 @@
 !gateway-service/*
 !user-service/
 !user-service/*
+
+!ms-gateway/
+!ms-gateway/*
+!ms-discovery/
+!ms-discovery/*
+
+!frontend/
+!frontend/*
