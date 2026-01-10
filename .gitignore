@@ -4,6 +4,7 @@
 # Sauf ces fichiers
 !.gitignore  
 !README.md 
+!launch_microservices.bat
 !ai-service/
 !ai-service/*
 !chatbot-service/
