@@ -1,29 +1,29 @@
 # Ignorer tout
-*
+**
 
 # Sauf ces fichiers
 !.gitignore  
 !README.md 
 !launch_microservices.bat
 !ai-service/
-!ai-service/*
+!ai-service/**
 !chatbot-service/
-!chatbot-service/*
+!chatbot-service/**
 !chat-service/
-!chat-service/*
+!chat-service/**
 !config-service/
-!config-service/*
+!config-service/**
 !discovery-service/
-!discovery-service/*
+!discovery-service/**
 !gateway-service/
-!gateway-service/*
+!gateway-service/**
 !user-service/
-!user-service/*
+!user-service/**
 
 !ms-gateway/
-!ms-gateway/*
+!ms-gateway/**
 !ms-discovery/
-!ms-discovery/*
+!ms-discovery/**
 
 !frontend/
-!frontend/*
+!frontend/**
