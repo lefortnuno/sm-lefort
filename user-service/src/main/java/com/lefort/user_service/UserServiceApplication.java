@@ -5,7 +5,7 @@ import com.lefort.user_service.repositories.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean; 
+import org.springframework.context.annotation.Bean;  
 
 @SpringBootApplication
 public class UserServiceApplication {
@@ -21,7 +21,6 @@ public class UserServiceApplication {
                     .idUser("1")
                     .username("admin")   
                     .build();
-
             userRepository.save(l1);
 
             User l2=User.builder()

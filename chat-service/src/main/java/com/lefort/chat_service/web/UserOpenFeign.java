@@ -12,5 +12,5 @@ public interface UserOpenFeign {
     @GetMapping("/users")
     public List<User> getAllUsers();
     @GetMapping("/users/{id}")
-    public User getUserById(@PathVariable String id);
+    public User getUserById(@PathVariable("id") String id);
 }

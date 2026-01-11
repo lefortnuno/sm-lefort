@@ -1,8 +1,8 @@
 import type { AuthResponse, Message, User } from '../types';
 
 class ApiService {
-  private baseUrl = 'http://localhost:8085';
-  private wsUrl = 'ws://localhost:8085/chat-service/ws/chat';
+  private baseUrl = import.meta.env.VITE_MICRO_GATEWAY_URL;
+  private wsUrl = import.meta.env.VITE_WS_URL;
   private token: string | null = null;
   private socket: WebSocket | null = null;
 
@@ -55,7 +55,7 @@ class ApiService {
 
   // Messages endpoints
   async getMessagesWith(userId: string, userId2: string): Promise<Message[]> { 
-    return this.request<Message[]>(`/chat-service/conv?u1=${userId}&u2=${userId2}`);
+    return this.request<Message[]>(`/chat-service/chats/conv?u1=${userId}&u2=${userId2}`);
  
   }
 

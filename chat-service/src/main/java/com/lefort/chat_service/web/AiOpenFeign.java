@@ -12,5 +12,5 @@ public interface AiOpenFeign {
     @GetMapping("/ais")
     public List<Ai> getAllAis();
     @GetMapping("/ais/{id}")
-    public Ai getAiById(@PathVariable Long id);
+    public Ai getAiById(@PathVariable("id") Long id);
 }

@@ -1,10 +1,13 @@
 # Ignorer tout
-**
+** 
 
 # Sauf ces fichiers
 !.gitignore  
 !README.md 
 !launch_microservices.bat
+!pom.xml
+!docker-compose.yml
+
 !ai-service/
 !ai-service/**
 !chatbot-service/
@@ -25,5 +28,10 @@
 !ms-discovery/
 !ms-discovery/**
 
+!common-events/
+!common-events/**
+
 !frontend/
 !frontend/**
+
+**/target/

@@ -9,9 +9,7 @@ echo ========================================
 :: Liste des services dans l'ordre de démarrage 
 @REM set SERVICES=config-service discovery-service user-service ai-service chat-service chatbot-service gateway-service  
 
-@REM set SERVICES=config-service ms-discovery user-service ai-service chat-service chatbot-service ms-gateway 
-
-set SERVICES=config-service ms-discovery user-service ai-service chat-service chatbot-service ms-gateway 
+set SERVICES=config-service ms-discovery user-service ai-service chat-service chatbot-service ms-gateway  
 
 :: Pour chaque service
 for %%s in (%SERVICES%) do (
