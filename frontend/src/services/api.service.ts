@@ -2,7 +2,9 @@ import type { AuthResponse, Message, User } from '../types';
 
 class ApiService {
   private baseUrl = 'http://localhost:8085';
+  private wsUrl = 'ws://localhost:8085/chat-service/ws/chat';
   private token: string | null = null;
+  private socket: WebSocket | null = null;
 
   setToken(token: string) {
     this.token = token;
@@ -70,7 +72,48 @@ class ApiService {
     });
  
   }
+  // WebSocket Methods
+  connectWS(onMessage: (data: string) => void) {
+    if (this.socket && (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING)) {
+      return; // Déjà connecté ou en cours
+    }
+
+    console.log('Connecting to WebSocket...');
+    this.socket = new WebSocket(this.wsUrl);
+
+    this.socket.onopen = () => {
+      console.log('✅ WS Connected');
+    };
+
+    this.socket.onmessage = (event) => {
+      onMessage(event.data);
+    };
+
+    this.socket.onerror = (error) => {
+      console.error('❌ WS Error:', error);
+    };
+
+    this.socket.onclose = () => {
+      console.log('⚠️ WS Disconnected');
+      this.socket = null;
+    };
+  }
+
+  disconnectWS() {
+    if (this.socket) {
+      this.socket.close();
+      this.socket = null;
+    }
+  }
+
+  sendWS(message: string) {
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      this.socket.send(message);
+    } else {
+      console.warn('Cannot send message: WS is not open');
+    }
+  }
 }
- 
+
 export const apiService = new ApiService();
 export default apiService;

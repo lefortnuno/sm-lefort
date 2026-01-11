@@ -12,22 +12,22 @@ export interface SyncUser {
 }
 
 export interface Message {
-  idChat: string;
+  idChat: number;
   chatcontent: string;
   senderUserId: string;
   receiverUserId: string;
-  aiId: Boolean;
+  aiId: number | null;
   created_at: string;
   
-    sender: {
+    sender?: {
         idUser: string;
         username: string;
     };
-    receiver: {
+    receiver?: {
         idUser: string;
         username: string;
     };
-    ai: {
+    ai?: {
         idAi: string;
         libelle: string;
         is_active: Boolean;

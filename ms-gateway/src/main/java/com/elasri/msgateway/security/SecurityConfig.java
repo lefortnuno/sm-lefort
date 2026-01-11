@@ -11,22 +11,12 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter;
 
-import org.springframework.security.oauth2.jwt.JwtDecoders;
-import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
-
 import org.springframework.http.HttpMethod;
 
 
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfig {
-
-    @Bean
-    public ReactiveJwtDecoder reactiveJwtDecoder() {
-        // Utilise ton issuer-uri défini dans application.properties
-        String issuerUri = "http://localhost:8080/realms/lefort-realm";
-        return JwtDecoders.fromIssuerLocation(issuerUri);
-    }
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
@@ -45,6 +35,8 @@ public class SecurityConfig {
                 .pathMatchers("/login/**", "/").permitAll()
                 .pathMatchers("/oauth2/**").permitAll()
                 .pathMatchers("/logout").permitAll()
+                // Autoriser les WebSockets pour chat-service
+                .pathMatchers("/chat-service/ws/**").permitAll()
                 .pathMatchers("/chat-service/**").authenticated()
                 .pathMatchers("/user-service/**").authenticated()
                 .anyExchange().authenticated()

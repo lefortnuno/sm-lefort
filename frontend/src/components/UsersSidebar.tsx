@@ -17,8 +17,7 @@ export const UsersSidebar = ({
   onSelectUser,
   loading = false
 }: UsersSidebarProps) => {
-  const [searchQuery, setSearchQuery] = useState('');
-console.log("sidebusers = ",users);
+  const [searchQuery, setSearchQuery] = useState(''); 
 
   const filteredUsers = users.filter(user => 
     user.idUser !== currentUser.idUser && 

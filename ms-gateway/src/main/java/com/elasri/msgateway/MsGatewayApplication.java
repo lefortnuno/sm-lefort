@@ -27,7 +27,8 @@ public class MsGatewayApplication {
     public RouteLocator webSocketRoutes(RouteLocatorBuilder builder) {
         return builder.routes()
             .route("chat_ws", r -> r.path("/chat-service/ws/**")
-                .uri("ws://localhost:7003") // ton chat-service
+                .filters(f -> f.rewritePath("/chat-service/(?<segment>.*)", "/${segment}"))
+                .uri("http://localhost:7003") // ton chat-service
             )
             .build();
     }

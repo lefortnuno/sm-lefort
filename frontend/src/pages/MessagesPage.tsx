@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
-import { MessageCircle, Send, LogOut, Loader2 } from 'lucide-react';
-import type { User, Message } from '../types';
-import apiService from '../services/api.service';
-import { UsersSidebar } from '../components/UsersSidebar';
-import { LogoutModal } from '../components/LogoutModal';
+import { useState, useEffect, useRef } from "react";
+import { MessageCircle, Send, LogOut, Loader2 } from "lucide-react";
+import type { User, Message } from "../types";
+import apiService from "../services/api.service";
+import { UsersSidebar } from "../components/UsersSidebar";
+import { LogoutModal } from "../components/LogoutModal";
 
 interface MessagesPageProps {
   user: User;
@@ -14,24 +14,68 @@ export const MessagesPage = ({ user, onLogout }: MessagesPageProps) => {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [newMessage, setNewMessage] = useState('');
+  const [newMessage, setNewMessage] = useState("");
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sending, setSending] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const selectedUserIdRef = useRef(selectedUserId);
+ 
+  useEffect(() => {
+    selectedUserIdRef.current = selectedUserId;
+  }, [selectedUserId]);
+
+  // Initialisation WebSocket via ApiService
+  useEffect(() => {
+    // Fonction appelée quand un message WS arrive
+    const handleWSMessage = (data: string) => {
+      try {
+        console.log("📩 WS Data:", data);
+        const parsedData = JSON.parse(data);
+        
+        // Logique d'affichage :
+        // 1. Message venant de l'ami sélectionné (Bob m'écrit)
+        // 2. Message venant de MOI vers l'ami sélectionné (Sync entre onglets)
+        const isFromContact = parsedData.senderId === selectedUserIdRef.current;
+        const isFromMeToContact = parsedData.senderId === user.idUser && parsedData.receiverId === selectedUserIdRef.current;
+
+        if (isFromContact || isFromMeToContact) {
+           const incomingMessage: Message = {
+            idChat: Date.now(),
+            senderUserId: parsedData.senderId,
+            receiverUserId: parsedData.receiverId || user.idUser,
+            chatcontent: parsedData.content,
+            created_at: new Date().toISOString(),
+            aiId: null,
+          };
+          setMessages((prev) => [...prev, incomingMessage]);
+        }
+      } catch (e) {
+        console.error("❌ Erreur parsing WS (Backend pas redémarré ?):", e);
+        // Fallback si le backend renvoie du texte brut (Echo)
+        if (typeof data === 'string' && !data.startsWith('{')) {
+             console.log("Mode Fallback Texte");
+        }
+      }
+    };
+
+    // Connexion
+    apiService.connectWS(handleWSMessage);
+
+    // Nettoyage à la fermeture du composant
+    return () => {
+      apiService.disconnectWS();
+    };
+  }, []);
 
   // Charger la liste des utilisateurs au démarrage
-  useEffect(() => {
-    console.log("u = ", user);
-    
+  useEffect(() => { 
     loadUsers();
   }, []);
 
   // Charger les messages quand un utilisateur est sélectionné
   useEffect(() => {
-    if (selectedUserId) {
-      console.log("idU= ",selectedUserId, user.idUser);
-      
+    if (selectedUserId) { 
       loadMessages(selectedUserId, user.idUser);
     }
   }, [selectedUserId]);
@@ -41,19 +85,19 @@ export const MessagesPage = ({ user, onLogout }: MessagesPageProps) => {
       const data = await apiService.getUsers();
       setUsers(data);
     } catch (error) {
-      console.error('Failed to load users:', error);
+      console.error("Failed to load users:", error);
     } finally {
       setLoadingUsers(false);
     }
   };
 
-  const loadMessages = async (userId: string,userId2: string) => {
+  const loadMessages = async (userId: string, userId2: string) => {
     setLoadingMessages(true);
     try {
       const data = await apiService.getMessagesWith(userId, userId2);
       setMessages(data);
     } catch (error) {
-      console.error('Failed to load messages:', error);
+      console.error("Failed to load messages:", error);
     } finally {
       setLoadingMessages(false);
     }
@@ -65,22 +109,31 @@ export const MessagesPage = ({ user, onLogout }: MessagesPageProps) => {
     setSending(true);
     try {
       const message = await apiService.sendMessage(
-        user.idUser,         
-        selectedUserId,       
+        user.idUser,
+        selectedUserId,
         newMessage,
-        1                
-    );
+        1
+      );
       setMessages((prev) => [...prev, message]);
-      setNewMessage('');
+
+      // 2. Envoi via WebSocket (JSON complet)
+      const wsPayload = JSON.stringify({
+        senderId: user.idUser,
+        receiverId: selectedUserId, // Ajout du destinataire
+        content: newMessage
+      });
+      apiService.sendWS(wsPayload);
+
+      setNewMessage("");
     } catch (error) {
-      console.error('Failed to send message:', error);
+      console.error("Failed to send message:", error);
     } finally {
       setSending(false);
     }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey && !sending && newMessage.trim()) {
+    if (e.key === "Enter" && !e.shiftKey && !sending && newMessage.trim()) {
       e.preventDefault();
       handleSend();
     }
@@ -91,19 +144,19 @@ export const MessagesPage = ({ user, onLogout }: MessagesPageProps) => {
     onLogout();
   };
 
-  const selectedUser = users.find(u => u.idUser === selectedUserId);
+  const selectedUser = users.find((u) => u.idUser === selectedUserId);
 
   // Générer une couleur basée sur le username
   const getAvatarColor = (username: string) => {
     const colors = [
-      'from-blue-400 to-blue-600',
-      'from-purple-400 to-purple-600',
-      'from-pink-400 to-pink-600',
-      'from-green-400 to-green-600',
-      'from-yellow-400 to-yellow-600',
-      'from-red-400 to-red-600',
-      'from-indigo-400 to-indigo-600',
-      'from-teal-400 to-teal-600',
+      "from-blue-400 to-blue-600",
+      "from-purple-400 to-purple-600",
+      "from-pink-400 to-pink-600",
+      "from-green-400 to-green-600",
+      "from-yellow-400 to-yellow-600",
+      "from-red-400 to-red-600",
+      "from-indigo-400 to-indigo-600",
+      "from-teal-400 to-teal-600",
     ];
     const index = username.charCodeAt(0) % colors.length;
     return colors[index];
@@ -127,7 +180,7 @@ export const MessagesPage = ({ user, onLogout }: MessagesPageProps) => {
               <p className="text-sm text-gray-500">{user.username}</p>
             </div>
           </div>
-          
+
           <button
             onClick={() => setShowLogoutModal(true)}
             className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition"
@@ -163,7 +216,11 @@ export const MessagesPage = ({ user, onLogout }: MessagesPageProps) => {
             <>
               {/* Chat Header */}
               <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${getAvatarColor(selectedUser.username)} flex items-center justify-center`}>
+                <div
+                  className={`w-10 h-10 rounded-full bg-gradient-to-br ${getAvatarColor(
+                    selectedUser.username
+                  )} flex items-center justify-center`}
+                >
                   <span className="text-white font-semibold text-sm">
                     {getInitials(selectedUser.username)}
                   </span>
@@ -187,31 +244,42 @@ export const MessagesPage = ({ user, onLogout }: MessagesPageProps) => {
                     <div className="text-center">
                       <MessageCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                       <p className="text-gray-500">Aucun message</p>
-                      <p className="text-sm text-gray-400">Envoyez le premier message !</p>
+                      <p className="text-sm text-gray-400">
+                        Envoyez le premier message !
+                      </p>
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-4 max-w-4xl mx-auto"> 
-                    {messages.map((msg) => { 
+                  <div className="space-y-4 max-w-4xl mx-auto">
+                    {messages.map((msg) => {
                       const isOwn = msg.senderUserId == user.idUser;
                       return (
                         <div
                           key={msg.idChat}
-                          className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
+                          className={`flex ${
+                            isOwn ? "justify-end" : "justify-start"
+                          }`}
                         >
                           <div
                             className={`max-w-md px-4 py-2 rounded-2xl ${
                               isOwn
-                                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
-                                : 'bg-gradient-to-r from-gray-200 to-gray-100 border border-gray-200 text-gray-800'
+                                ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
+                                : "bg-gradient-to-r from-gray-200 to-gray-100 border border-gray-200 text-gray-800"
                             }`}
-                          > 
+                          >
                             <p className="break-words">{msg.chatcontent}</p>
-                            <p className={`text-xs mt-1 ${isOwn ? 'text-blue-100' : 'text-gray-500'}`}>
-                              {new Date(msg.created_at).toLocaleTimeString('fr-FR', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
+                            <p
+                              className={`text-xs mt-1 ${
+                                isOwn ? "text-blue-100" : "text-gray-500"
+                              }`}
+                            >
+                              {new Date(msg.created_at).toLocaleTimeString(
+                                "fr-FR",
+                                {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                }
+                              )}
                             </p>
                           </div>
                         </div>
@@ -259,7 +327,8 @@ export const MessagesPage = ({ user, onLogout }: MessagesPageProps) => {
                   Sélectionnez une conversation
                 </h3>
                 <p className="text-gray-400">
-                  Choisissez un utilisateur dans la liste pour commencer à discuter
+                  Choisissez un utilisateur dans la liste pour commencer à
+                  discuter
                 </p>
               </div>
             </div>
