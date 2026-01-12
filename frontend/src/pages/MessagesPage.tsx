@@ -11,14 +11,13 @@ import type { User, Message, AIModel } from "../types";
 import apiService from "../services/api.service";
 import { UsersSidebar } from "../components/UsersSidebar";
 import { LogoutModal } from "../components/LogoutModal";
-// import logo from '../assets/images/logoIAO.jpg';
 
 interface MessagesPageProps {
   user: User;
   onLogout: () => void;
 }
 
-// ===== COMPOSANT SÉLECTEUR DE MODÈLE AI - À AJOUTER AVANT MessagesPage =====
+// ===== COMPOSANT SÉLECTEUR DE MODÈLE AI =====
 const AIModelSelector = ({
   models,
   selectedModelId,
@@ -97,9 +96,9 @@ export const MessagesPage = ({ user, onLogout }: MessagesPageProps) => {
   const [newMessage, setNewMessage] = useState("");
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
-  const [loadingAIModels, setLoadingAIModels] = useState(false); // NOUVEAU
+  const [loadingAIModels, setLoadingAIModels] = useState(false); 
   const [sending, setSending] = useState(false);
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false); 
   const selectedUserIdRef = useRef(selectedUserId);
   const selectedAimodelIdRef = useRef(selectedAIModelId);
 
@@ -111,45 +110,6 @@ export const MessagesPage = ({ user, onLogout }: MessagesPageProps) => {
     selectedAimodelIdRef.current = selectedAIModelId;
   }, [selectedAIModelId]);
 
-  // Initialisation WebSocket via ApiService
-  useEffect(() => {
-    const handleWSMessage = (data: string) => {
-      try {
-        console.log("📩 WS Data:", data);
-        const parsedData = JSON.parse(data);
-
-        const isFromContact = parsedData.senderId === selectedUserIdRef.current;
-        const isFromMeToContact =
-          parsedData.senderId === user.idUser &&
-          parsedData.receiverId === selectedUserIdRef.current;
-
-        if (isFromContact || isFromMeToContact) {
-          const incomingMessage: Message = {
-            idChat: Date.now(),
-            senderUserId: parsedData.senderId,
-            receiverUserId: parsedData.receiverId || user.idUser,
-            chatcontent: parsedData.content,
-            created_at: new Date().toISOString(),
-            chatmaj: false,
-            aiId: null,
-          };
-          setMessages((prev) => [...prev, incomingMessage]);
-        }
-      } catch (e) {
-        console.error("Erreur parsing WS (Backend pas redémarré ?):", e);
-        if (typeof data === "string" && !data.startsWith("{")) {
-          console.log("Mode Fallback Texte");
-        }
-      }
-    };
-
-    apiService.connectWS(handleWSMessage);
-
-    return () => {
-      apiService.disconnectWS();
-    };
-  }, []);
- 
   useEffect(() => {
     loadUsers();
     loadAIModels();
@@ -172,15 +132,14 @@ export const MessagesPage = ({ user, onLogout }: MessagesPageProps) => {
       setLoadingUsers(false);
     }
   };
-  
 
   // USER CHECKER TROFEL
   useEffect(() => {
     const checkNewUsers = async () => {
       try {
         const data = await apiService.getUsers();
- 
-        if (data.length !== users.length) { 
+
+        if (data.length !== users.length) {
           setUsers(data);
         }
       } catch (error) {
@@ -190,17 +149,24 @@ export const MessagesPage = ({ user, onLogout }: MessagesPageProps) => {
         );
       }
     };
- 
-    const intervalUsers = setInterval(checkNewUsers, 3000);
+
+    const intervalUsers = setInterval(checkNewUsers, 9000);
     return () => clearInterval(intervalUsers);
-  }, [users]);  
- 
+  }, [users]);
+
   // MESSAGE CHECKER TROFEL
-  useEffect(() => { 
-    if (!selectedUserId) return; 
+  const lastMessageRef = useRef<{
+    idChat: number | null;
+    updatedAt: string | null;
+  }>({ idChat: null, updatedAt: null });
+
+  useEffect(() => {
+    if (!selectedUserId) return;
+
     const checkNewMessages = async () => {
       try {
-        const data = await apiService.getChats(); 
+        const data = await apiService.getChats();
+
         const relevantMessages = data.filter(
           (msg) =>
             (msg.senderUserId === user.idUser &&
@@ -208,18 +174,34 @@ export const MessagesPage = ({ user, onLogout }: MessagesPageProps) => {
             (msg.senderUserId === selectedUserId &&
               msg.receiverUserId === user.idUser)
         );
- 
-        if (relevantMessages.length !== messages.length) { 
+
+        if (relevantMessages.length === 0) return;
+
+        const lastMessage = relevantMessages[relevantMessages.length - 1];
+
+        const hasNewMessage =
+          lastMessage.idChat !== lastMessageRef.current.idChat;
+
+        const hasUpdate =
+          lastMessage.chatmaj === true &&
+          lastMessage.updated_at !== lastMessageRef.current.updatedAt;
+
+        if (hasNewMessage || hasUpdate) {
+          lastMessageRef.current = {
+            idChat: lastMessage.idChat,
+            updatedAt: lastMessage.updated_at,
+          };
+
           loadMessages(selectedUserId, user.idUser);
-          setMessages(relevantMessages);
         }
       } catch (error) {
         console.error("Erreur lors de la vérification des messages:", error);
       }
     };
-    const intervalMessages = setInterval(checkNewMessages, 2000);
+
+    const intervalMessages = setInterval(checkNewMessages, 5000);
     return () => clearInterval(intervalMessages);
-  }, [selectedUserId, messages, user.idUser]);  
+  }, [selectedUserId, user.idUser]);
 
   // NOUVELLE FONCTION : Charger les modèles AI
   const loadAIModels = async () => {
@@ -258,13 +240,6 @@ export const MessagesPage = ({ user, onLogout }: MessagesPageProps) => {
         selectedAimodelIdRef.current
       );
       setMessages((prev) => [...prev, message]);
-
-      const wsPayload = JSON.stringify({
-        senderId: user.idUser,
-        receiverId: selectedUserId,
-        content: newMessage,
-      });
-      apiService.sendWS(wsPayload);
 
       setNewMessage("");
     } catch (error) {

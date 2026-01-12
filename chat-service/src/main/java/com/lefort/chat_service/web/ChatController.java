@@ -1,20 +1,19 @@
 package com.lefort.chat_service.web;
 
 import com.lefort.chat_service.entities.Chat;
-import com.lefort.chat_service.service.ChatService;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import com.lefort.chat_service.service.ChatService; 
+import org.springframework.web.bind.annotation.*; 
+import java.util.*;
 
 @RestController
 @RequestMapping("/chats")
 public class ChatController {
 
-    private final ChatService chatService;
+    private final ChatService chatService; 
 
     public ChatController(ChatService chatService) {
-        this.chatService = chatService;
-    }
+        this.chatService = chatService; 
+    }  
 
     // ======================== GET ALL ========================
     @GetMapping

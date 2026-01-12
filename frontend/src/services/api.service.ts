@@ -1,10 +1,8 @@
-import type { AIModel, AuthResponse, Message, User } from '../types';
+import type { AIModel, Message, User } from "../types";
 
 class ApiService {
   private baseUrl = import.meta.env.VITE_MICRO_GATEWAY_URL;
-  private wsUrl = import.meta.env.VITE_WS_URL;
   private token: string | null = null;
-  private socket: WebSocket | null = null;
 
   setToken(token: string) {
     this.token = token;
@@ -19,11 +17,11 @@ class ApiService {
   }
 
   private async request<T>(
-    endpoint: string, 
+    endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
     const headers: HeadersInit = {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...(this.token && { Authorization: `Bearer ${this.token}` }),
       ...options.headers,
     };
@@ -39,85 +37,48 @@ class ApiService {
 
     return response.json();
   }
- 
- 
-  async getUsers(): Promise<User[]> {  
-    return this.request<User[]>('/user-service/users'); 
+
+  async getUsers(): Promise<User[]> {
+    return this.request<User[]>("/user-service/users");
   }
 
-  async getAIModel(): Promise<AIModel[]> {  
-    return this.request<AIModel[]>('/ai-service/ais'); 
-  }
-  
-  async getChats(): Promise<Message[]> {  
-    return this.request<Message[]>('/chat-service/chats'); 
+  async getAIModel(): Promise<AIModel[]> {
+    return this.request<AIModel[]>("/ai-service/ais");
   }
 
-  async ensureUser(user: Pick<User, 'idUser' | 'username'>): Promise<User> {
-    return this.request<User>('/user-service/users/ensure', {
-      method: 'POST',
+  async getChats(): Promise<Message[]> {
+    return this.request<Message[]>("/chat-service/chats");
+  }
+ 
+  async ensureUser(user: Pick<User, "idUser" | "username">): Promise<User> {
+    return this.request<User>("/user-service/users/ensure", {
+      method: "POST",
       body: JSON.stringify(user),
     });
-  } 
-
-  async getMessagesWith(userId: string, userId2: string): Promise<Message[]> { 
-    return this.request<Message[]>(`/chat-service/chats/conv?u1=${userId}&u2=${userId2}`);
   }
 
-  async sendMessage(senderUserId: string, receiverUserId: string, content: string, aiId: number | null = null): Promise<Message> { 
-    return this.request<Message>('/chat-service/chats', {
-      method: 'POST',
-      body: JSON.stringify({ 
+  async getMessagesWith(userId: string, userId2: string): Promise<Message[]> {
+    return this.request<Message[]>(
+      `/chat-service/chats/conv?u1=${userId}&u2=${userId2}`
+    );
+  }
+
+  async sendMessage(
+    senderUserId: string,
+    receiverUserId: string,
+    content: string,
+    aiId: number | null = null
+  ): Promise<Message> {
+    return this.request<Message>("/chat-service/chats", {
+      method: "POST",
+      body: JSON.stringify({
         senderUserId,
         receiverUserId,
         aiId,
         chatcontent: content,
-        created_at: new Date().toISOString()
-     }),
+        created_at: new Date().toISOString(),
+      }),
     });
- 
-  }
-
-  // WebSocket Methods
-  connectWS(onMessage: (data: string) => void) {
-    if (this.socket && (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING)) {
-      return; // Déjà connecté ou en cours
-    }
-
-    console.log('Connecting to WebSocket...');
-    this.socket = new WebSocket(this.wsUrl);
-
-    this.socket.onopen = () => {
-      console.log('✅ WS Connected');
-    };
-
-    this.socket.onmessage = (event) => {
-      onMessage(event.data);
-    };
-
-    this.socket.onerror = (error) => {
-      console.error('❌ WS Error:', error);
-    };
-
-    this.socket.onclose = () => {
-      console.log('⚠️ WS Disconnected');
-      this.socket = null;
-    };
-  }
-
-  disconnectWS() {
-    if (this.socket) {
-      this.socket.close();
-      this.socket = null;
-    }
-  }
-
-  sendWS(message: string) {
-    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      this.socket.send(message);
-    } else {
-      console.warn('Cannot send message: WS is not open');
-    }
   }
 }
 

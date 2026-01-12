@@ -18,6 +18,7 @@ export interface Message {
   receiverUserId: string;
   aiId: number | null;
   created_at: string;
+  updated_at: string;
   chatmaj: Boolean;
   
     sender?: {

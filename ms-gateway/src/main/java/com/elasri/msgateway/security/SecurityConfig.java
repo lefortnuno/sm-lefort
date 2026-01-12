@@ -34,9 +34,7 @@ public class SecurityConfig {
                 .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .pathMatchers("/login/**", "/").permitAll()
                 .pathMatchers("/oauth2/**").permitAll()
-                .pathMatchers("/logout").permitAll()
-                // Autoriser les WebSockets pour chat-service
-                .pathMatchers("/chat-service/ws/**").permitAll()
+                .pathMatchers("/logout").permitAll() 
                 .pathMatchers("/chat-service/**").authenticated()
                 .pathMatchers("/user-service/**").authenticated()
                 .anyExchange().authenticated()

@@ -39,11 +39,11 @@ public class ServiceLLM {
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setBearerAuth(API_KEY);
             
-            // Construire le prompt système STRICT pour la correction grammaticale
+            // Construire le prompt système STRICT pour la correction grammaticale et syntaxique
             String systemPrompt = 
-                "Tu es un correcteur grammatical automatique. Tu dois:\n" +
+                "Tu es un humain chargé de corriger la grammaire et la syntaxe. Tu dois:\n" +
                 "1. Analyser le texte fourni\n" +
-                "2. Corriger TOUTES les fautes de grammaire, orthographe et syntaxe\n" +
+                "2. Corriger TOUTES les fautes de grammaire, d'orthographe, de conjugaison des verbes et de syntaxe\n" +
                 "3. Retourner UNIQUEMENT un objet JSON valide au format suivant:\n" +
                 "{\n" +
                 "  \"status\": boolean,\n" +

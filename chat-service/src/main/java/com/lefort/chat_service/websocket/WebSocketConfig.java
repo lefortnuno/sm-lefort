@@ -19,7 +19,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(new ChatWebSocketHandler(), "/ws/chat")
-                .setAllowedOrigins("*"); // Autoriser toutes les origines pour le test
+                .setAllowedOrigins("*");  
     }
 
     // Handler interne pour gérer les messages

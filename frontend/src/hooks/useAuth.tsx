@@ -51,12 +51,9 @@ export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
           const syncUser: SyncUser = {
             idUser: keycloak.subject || '',
             username: keycloak.tokenParsed?.preferred_username || '',
-          };
-
-          console.log("syncUser= ",syncUser);
+          }; 
 
           await apiService.ensureUser(syncUser);
-
           setUser(keycloakUser);
           navigate('/messages');
         }

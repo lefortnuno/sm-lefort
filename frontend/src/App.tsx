@@ -24,9 +24,6 @@ const PublicRoute = ({ children }: { children: JSX.Element }) => {
 
 export default function App() {
   const { user, logout } = useAuth();
-  console.log("APP user = ", user);
-  
-
   return (
     <Routes>
       <Route

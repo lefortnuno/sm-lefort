@@ -27,10 +27,10 @@ public class UserService {
     }
 
     public User createUser(User user) {
-        // 1️⃣ Sauvegarde DB
+        // Sauvegarde DB
         User savedUser = userRepository.save(user);
 
-        // 2️⃣ Publication Kafka
+        // Publication Kafka
         userEventProducer.publishUserCreated(
             new UserCreatedEvent(
                 savedUser.getIdUser(),

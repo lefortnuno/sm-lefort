@@ -42,4 +42,9 @@ docker rm -f keycloak
 docker run -d --name keycloak -p 8080:8080 -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=admin quay.io/keycloak/keycloak:24.0 start-dev
 
 
-# KAFKA
+# Conteneurisation frontend
+docker build -t frontend-app .
+
+## lancement frontend dans le conteneur 
+docker run --name frontend -p 5173:5173 frontend-app 
+ 

@@ -1,6 +1,6 @@
-import { User as UserIcon, Search } from 'lucide-react';
-import type { User } from '../types';
-import { useState } from 'react';
+import { User as UserIcon, Search } from "lucide-react";
+import type { User } from "../types";
+import { useState } from "react";
 
 interface UsersSidebarProps {
   users: User[];
@@ -10,30 +10,30 @@ interface UsersSidebarProps {
   loading?: boolean;
 }
 
-export const UsersSidebar = ({ 
-  users, 
+export const UsersSidebar = ({
+  users,
   currentUser,
-  selectedUserId, 
+  selectedUserId,
   onSelectUser,
-  loading = false
+  loading = false,
 }: UsersSidebarProps) => {
-  const [searchQuery, setSearchQuery] = useState(''); 
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredUsers = users.filter(user =>  
+  const filteredUsers = users.filter((user) =>
     user.username.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Générer une couleur basée sur le username
   const getAvatarColor = (username: string) => {
     const colors = [
-      'from-blue-400 to-blue-600',
-      'from-purple-400 to-purple-600',
-      'from-pink-400 to-pink-600',
-      'from-green-400 to-green-600',
-      'from-yellow-400 to-yellow-600',
-      'from-red-400 to-red-600',
-      'from-indigo-400 to-indigo-600',
-      'from-teal-400 to-teal-600',
+      "from-blue-400 to-blue-600",
+      "from-purple-400 to-purple-600",
+      "from-pink-400 to-pink-600",
+      "from-green-400 to-green-600",
+      "from-yellow-400 to-yellow-600",
+      "from-red-400 to-red-600",
+      "from-indigo-400 to-indigo-600",
+      "from-teal-400 to-teal-600",
     ];
     const index = username.charCodeAt(0) % colors.length;
     return colors[index];
@@ -48,7 +48,7 @@ export const UsersSidebar = ({
       {/* Sidebar Header */}
       <div className="p-4 border-b border-gray-200">
         <h2 className="text-lg font-bold text-gray-800 mb-3">Messages</h2>
-        
+
         {/* Search Bar */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -72,7 +72,9 @@ export const UsersSidebar = ({
           <div className="text-center py-8 px-4">
             <UserIcon className="w-12 h-12 text-gray-300 mx-auto mb-2" />
             <p className="text-sm text-gray-500">
-              {searchQuery ? 'Aucun utilisateur trouvé' : 'Aucun utilisateur disponible'}
+              {searchQuery
+                ? "Aucun utilisateur trouvé"
+                : "Aucun utilisateur disponible"}
             </p>
           </div>
         ) : (
@@ -82,11 +84,17 @@ export const UsersSidebar = ({
                 key={user.idUser}
                 onClick={() => onSelectUser(user.idUser)}
                 className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition ${
-                  selectedUserId === user.idUser ? 'bg-blue-50 border-l-4 border-blue-500' : ''
+                  selectedUserId === user.idUser
+                    ? "bg-blue-50 border-l-4 border-blue-500"
+                    : ""
                 }`}
               >
                 {/* Avatar */}
-                <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${getAvatarColor(user.username)} flex items-center justify-center flex-shrink-0`}>
+                <div
+                  className={`w-12 h-12 rounded-full bg-gradient-to-br ${getAvatarColor(
+                    user.username
+                  )} flex items-center justify-center flex-shrink-0`}
+                >
                   <span className="text-white font-semibold text-sm">
                     {getInitials(user.username)}
                   </span>
@@ -94,10 +102,15 @@ export const UsersSidebar = ({
 
                 {/* User Info */}
                 <div className="flex-1 text-left min-w-0">
-                 <p className={`font-medium truncate ${
-                    selectedUserId === user.idUser ? 'text-blue-600' : 'text-gray-800'
-                  }`}>
-                    {user.username} 
+                  <p
+                    className={`font-medium truncate ${
+                      selectedUserId === user.idUser
+                        ? "text-blue-600"
+                        : "text-gray-800"
+                    }`}
+                  >
+                    <span className="capitalize"> {user.username}</span>
+
                     {user.idUser === currentUser.idUser && (
                       <span className="ml-2 text-xs font-semibold px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">
                         (Moi)

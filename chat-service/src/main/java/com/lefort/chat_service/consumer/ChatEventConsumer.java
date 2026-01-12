@@ -12,7 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.*; 
 import com.lefort.chat_service.entities.Chat;
 import com.lefort.chat_service.repositories.ChatRepository;    
-import org.springframework.transaction.annotation.Transactional; 
+import org.springframework.transaction.annotation.Transactional;  
+
+import java.time.LocalDateTime; 
+
 
 @Service
 public class ChatEventConsumer {
@@ -27,7 +30,7 @@ public class ChatEventConsumer {
     public void consume(ChatCreatedEvent event) {
         System.out.println("Chat recu dans chat-service : " + event);
 
-        // Publier une demande de correction
+        // Publier une demande de correction au LLM
         GrammarCorrectionRequest correctionRequest = new GrammarCorrectionRequest(
             event.getChatId(),
             event.getChatcontent()
@@ -62,12 +65,13 @@ public class ChatEventConsumer {
                     
                     // Mettre à jour avec le texte corrigé
                     chat.setChatmaj(true);
+                    chat.setUpdated_at(LocalDateTime.now());
                     chat.setChatcontent(correctedText);
                     chatRepository.save(chat);
                     
                     System.out.println("Chat ID " + chatId + " mis à jour avec succès");
                     System.out.println(" Ancien texte: " + oldContent);
-                    System.out.println(" Nouveau texte: " + correctedText);
+                    System.out.println(" Nouveau texte: " + correctedText); 
                 } else {
                     System.err.println("Chat ID " + chatId + " non trouvé dans la base de données");
                 }
