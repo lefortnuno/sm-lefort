@@ -23,22 +23,22 @@ public class ChatServiceApplication {
     @Bean
     CommandLineRunner run(ChatRepository chatRepository) {
         return args -> {
-            Chat chat11 = Chat
-                    .builder()
-                    .senderUserId("1")
-                    .receiverUserId("2")
-                    .aiId(1L) 
-                    .chatcontent("Bonjour le monde !") 
-                    .build();
-            chatRepository.save(chat11);
-            Chat chat12 = Chat
-                    .builder() 
-                    .senderUserId("2")
-                    .receiverUserId("1")
-                    .aiId(1L) 
-                    .chatcontent("RE-Bonjour le monde !") 
-                    .build();
-            chatRepository.save(chat12); 
+            // Chat chat11 = Chat
+            //         .builder()
+            //         .senderUserId("1")
+            //         .receiverUserId("2")
+            //         .aiId(1L) 
+            //         .chatcontent("Bonjour le monde !") 
+            //         .build();
+            // chatRepository.save(chat11);
+            // Chat chat12 = Chat
+            //         .builder() 
+            //         .senderUserId("2")
+            //         .receiverUserId("1")
+            //         .aiId(1L) 
+            //         .chatcontent("RE-Bonjour le monde !") 
+            //         .build();
+            // chatRepository.save(chat12); 
  
         };
     }
