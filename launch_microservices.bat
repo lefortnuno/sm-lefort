@@ -4,14 +4,10 @@ title Lancement Micro-services E-bulltin
 
 echo ========================================
 echo  Lancement des micro-services Spring Boot
-echo ========================================
+echo ======================================== 
 
-:: Liste des services dans l'ordre de démarrage 
-@REM set SERVICES=config-service discovery-service user-service ai-service chat-service chatbot-service gateway-service  
-
-set SERVICES=config-service ms-discovery user-service ai-service chat-service chatbot-service ms-gateway  
-
-:: Pour chaque service
+set SERVICES=config-service ms-discovery user-service ai-service chat-service ms-gateway  
+ 
 for %%s in (%SERVICES%) do (
     echo.
     echo Démarrage de %%s...
@@ -39,7 +35,7 @@ echo ========================================
 echo  Lancement du frontend React
 echo ========================================
 if exist "frontend\package.json" (
-    start "frontend" cmd /k "cd /d frontend && npm run dev"
+    start "frontend" cmd /c "cd /d frontend && npm run dev"
     echo ✓ Frontend en cours d'exécution (Fenêtre séparée)
 ) else (
     echo ✗ Aucun frontend trouvé dans /frontend
@@ -54,16 +50,13 @@ if exist "..\frontend.log" (
 )
 echo.
 
-
 echo ========================================
 echo Tous les services sont en cours d'exécution
 echo Fermez les fenêtres pour arrêter.
 echo ========================================
 echo.
-
 pause >nul
 
-:: Nettoyage à la fermeture (tuer tous les mvn lancés)
 echo Arrêt de tous les micro-services...
 taskkill /F /T /IM mvn.cmd >nul 2>&1
 taskkill /F /T /IM java.exe >nul 2>&1
@@ -71,7 +64,4 @@ taskkill /F /T /IM node.exe >nul 2>&1
 
 echo Tous les services sont arrêtés.
 timeout /t 2 >nul
- 
-
-@REM  http://localhost:8085/emprunt2023/emprunts
-@REM  http://localhost:2025/emprunts
+  
