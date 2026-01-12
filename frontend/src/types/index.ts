@@ -18,6 +18,7 @@ export interface Message {
   receiverUserId: string;
   aiId: number | null;
   created_at: string;
+  chatmaj: Boolean;
   
     sender?: {
         idUser: string;
@@ -46,4 +47,10 @@ export interface MessageBot {
 export interface AuthResponse {
   token: string;
   user: User;
+}
+
+export interface AIModel {
+  idAi: number;
+  aiId: string;
+  libelle: string;
 }

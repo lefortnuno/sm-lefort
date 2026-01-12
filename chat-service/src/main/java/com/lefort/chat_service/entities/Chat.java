@@ -15,6 +15,7 @@ public class Chat {
     private Long idChat;
     private String chatcontent;
     private LocalDateTime created_at; 
+    private Boolean chatmaj;
     
     private String senderUserId;
     private String receiverUserId;
@@ -32,5 +33,6 @@ public class Chat {
     @PrePersist
     protected void onCreate() {
         this.created_at = LocalDateTime.now();
-    }
+        this.chatmaj = false;
+    } 
 }

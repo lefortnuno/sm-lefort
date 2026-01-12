@@ -17,17 +17,17 @@ public class UserServiceApplication {
     @Bean
     CommandLineRunner init(UserRepository userRepository) {
         return args -> {
-            User l1= User.builder()
-                    .idUser("1")
-                    .username("admin")   
-                    .build();
-            userRepository.save(l1);
+            // User l1= User.builder()
+            //         .idUser("1")
+            //         .username("admin")   
+            //         .build();
+            // userRepository.save(l1);
 
-            User l2=User.builder()
-                    .idUser("2")
-                    .username("root")   
-                    .build();
-            userRepository.save(l2);
+            // User l2=User.builder()
+            //         .idUser("2")
+            //         .username("root")   
+            //         .build();
+            // userRepository.save(l2);
 
         };
     }

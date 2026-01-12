@@ -19,8 +19,7 @@ export const UsersSidebar = ({
 }: UsersSidebarProps) => {
   const [searchQuery, setSearchQuery] = useState(''); 
 
-  const filteredUsers = users.filter(user => 
-    user.idUser !== currentUser.idUser && 
+  const filteredUsers = users.filter(user =>  
     user.username.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -69,7 +68,7 @@ export const UsersSidebar = ({
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
           </div>
-        ) : users.length === 0 ? (
+        ) : filteredUsers.length === 0 ? (
           <div className="text-center py-8 px-4">
             <UserIcon className="w-12 h-12 text-gray-300 mx-auto mb-2" />
             <p className="text-sm text-gray-500">
@@ -78,7 +77,7 @@ export const UsersSidebar = ({
           </div>
         ) : (
           <div className="py-2">
-            {users.map((user) => (
+            {filteredUsers.map((user) => (
               <button
                 key={user.idUser}
                 onClick={() => onSelectUser(user.idUser)}

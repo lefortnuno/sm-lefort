@@ -22,14 +22,14 @@ public class AiServiceApplication {
         return args -> {
             Ai c1 = Ai
                     .builder()
-                    .libelle("ollama")
+                    .libelle("qwen/qwen3-32b")
                     .is_active(true) 
                     .build();
             aiRepository.save(c1);
 
             Ai c2 = Ai
                     .builder()
-                    .libelle("qween")
+                    .libelle("llama-3.3-70b-versatile")
                     .is_active(true) 
                     .build();
             aiRepository.save(c2); 

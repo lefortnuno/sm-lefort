@@ -1,4 +1,4 @@
-import type { AuthResponse, Message, User } from '../types';
+import type { AIModel, AuthResponse, Message, User } from '../types';
 
 class ApiService {
   private baseUrl = import.meta.env.VITE_MICRO_GATEWAY_URL;
@@ -40,10 +40,17 @@ class ApiService {
     return response.json();
   }
  
-
-  // Users endpoints a changer par keyclock
+ 
   async getUsers(): Promise<User[]> {  
     return this.request<User[]>('/user-service/users'); 
+  }
+
+  async getAIModel(): Promise<AIModel[]> {  
+    return this.request<AIModel[]>('/ai-service/ais'); 
+  }
+  
+  async getChats(): Promise<Message[]> {  
+    return this.request<Message[]>('/chat-service/chats'); 
   }
 
   async ensureUser(user: Pick<User, 'idUser' | 'username'>): Promise<User> {
@@ -51,12 +58,10 @@ class ApiService {
       method: 'POST',
       body: JSON.stringify(user),
     });
-  }
+  } 
 
-  // Messages endpoints
   async getMessagesWith(userId: string, userId2: string): Promise<Message[]> { 
     return this.request<Message[]>(`/chat-service/chats/conv?u1=${userId}&u2=${userId2}`);
- 
   }
 
   async sendMessage(senderUserId: string, receiverUserId: string, content: string, aiId: number | null = null): Promise<Message> { 
@@ -72,6 +77,7 @@ class ApiService {
     });
  
   }
+
   // WebSocket Methods
   connectWS(onMessage: (data: string) => void) {
     if (this.socket && (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING)) {

@@ -1,81 +1,163 @@
 import { useState, useEffect, useRef } from "react";
-import { MessageCircle, Send, LogOut, Loader2 } from "lucide-react";
-import type { User, Message } from "../types";
+import {
+  MessageCircle,
+  Send,
+  LogOut,
+  Loader2,
+  Brain,
+  ChevronDown,
+} from "lucide-react";
+import type { User, Message, AIModel } from "../types";
 import apiService from "../services/api.service";
 import { UsersSidebar } from "../components/UsersSidebar";
 import { LogoutModal } from "../components/LogoutModal";
+// import logo from '../assets/images/logoIAO.jpg';
 
 interface MessagesPageProps {
   user: User;
   onLogout: () => void;
 }
 
+// ===== COMPOSANT SÉLECTEUR DE MODÈLE AI - À AJOUTER AVANT MessagesPage =====
+const AIModelSelector = ({
+  models,
+  selectedModelId,
+  onSelectModel,
+  loading,
+}: {
+  models: AIModel[];
+  selectedModelId: number;
+  onSelectModel: (id: number) => void;
+  loading: boolean;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const selectedModel = models.find((m) => m.idAi === selectedModelId);
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        disabled={loading}
+        className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition disabled:opacity-50"
+      >
+        <Brain className="w-4 h-4 text-purple-600" />
+        <span className="text-sm font-medium text-gray-700">
+          {loading ? "Chargement..." : selectedModel?.libelle || "Sélectionner"}
+        </span>
+        <ChevronDown
+          className={`w-4 h-4 text-gray-400 transition-transform ${
+            isOpen ? "rotate-180" : ""
+          }`}
+        />
+      </button>
+
+      {isOpen && !loading && (
+        <>
+          <div
+            className="fixed inset-0 z-10"
+            onClick={() => setIsOpen(false)}
+          />
+          <div className="absolute top-full mt-2 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-20 min-w-[200px]">
+            <div className="py-1">
+              {models.map((model) => (
+                <button
+                  key={model.idAi}
+                  onClick={() => {
+                    onSelectModel(model.idAi);
+                    setIsOpen(false);
+                  }}
+                  className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition flex items-center gap-2 ${
+                    model.idAi === selectedModelId
+                      ? "bg-purple-50 text-purple-700"
+                      : "text-gray-700"
+                  }`}
+                >
+                  <Brain className="w-4 h-4" />
+                  {model.libelle}
+                  {model.idAi === selectedModelId && (
+                    <span className="ml-auto text-xs">✓</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+// ===== COMPOSANT PRINCIPAL MessagesPage =====
 export const MessagesPage = ({ user, onLogout }: MessagesPageProps) => {
   const [users, setUsers] = useState<User[]>([]);
+  const [aimodels, setAimodels] = useState<AIModel[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [selectedAIModelId, setSelectedAIModelId] = useState<number>(1);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
+  const [loadingAIModels, setLoadingAIModels] = useState(false); // NOUVEAU
   const [sending, setSending] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const selectedUserIdRef = useRef(selectedUserId);
- 
+  const selectedAimodelIdRef = useRef(selectedAIModelId);
+
   useEffect(() => {
     selectedUserIdRef.current = selectedUserId;
   }, [selectedUserId]);
 
+  useEffect(() => {
+    selectedAimodelIdRef.current = selectedAIModelId;
+  }, [selectedAIModelId]);
+
   // Initialisation WebSocket via ApiService
   useEffect(() => {
-    // Fonction appelée quand un message WS arrive
     const handleWSMessage = (data: string) => {
       try {
         console.log("📩 WS Data:", data);
         const parsedData = JSON.parse(data);
-        
-        // Logique d'affichage :
-        // 1. Message venant de l'ami sélectionné (Bob m'écrit)
-        // 2. Message venant de MOI vers l'ami sélectionné (Sync entre onglets)
+
         const isFromContact = parsedData.senderId === selectedUserIdRef.current;
-        const isFromMeToContact = parsedData.senderId === user.idUser && parsedData.receiverId === selectedUserIdRef.current;
+        const isFromMeToContact =
+          parsedData.senderId === user.idUser &&
+          parsedData.receiverId === selectedUserIdRef.current;
 
         if (isFromContact || isFromMeToContact) {
-           const incomingMessage: Message = {
+          const incomingMessage: Message = {
             idChat: Date.now(),
             senderUserId: parsedData.senderId,
             receiverUserId: parsedData.receiverId || user.idUser,
             chatcontent: parsedData.content,
             created_at: new Date().toISOString(),
+            chatmaj: false,
             aiId: null,
           };
           setMessages((prev) => [...prev, incomingMessage]);
         }
       } catch (e) {
-        console.error("❌ Erreur parsing WS (Backend pas redémarré ?):", e);
-        // Fallback si le backend renvoie du texte brut (Echo)
-        if (typeof data === 'string' && !data.startsWith('{')) {
-             console.log("Mode Fallback Texte");
+        console.error("Erreur parsing WS (Backend pas redémarré ?):", e);
+        if (typeof data === "string" && !data.startsWith("{")) {
+          console.log("Mode Fallback Texte");
         }
       }
     };
 
-    // Connexion
     apiService.connectWS(handleWSMessage);
 
-    // Nettoyage à la fermeture du composant
     return () => {
       apiService.disconnectWS();
     };
   }, []);
-
-  // Charger la liste des utilisateurs au démarrage
-  useEffect(() => { 
+ 
+  useEffect(() => {
     loadUsers();
+    loadAIModels();
   }, []);
 
   // Charger les messages quand un utilisateur est sélectionné
   useEffect(() => {
-    if (selectedUserId) { 
+    if (selectedUserId) {
       loadMessages(selectedUserId, user.idUser);
     }
   }, [selectedUserId]);
@@ -88,6 +170,67 @@ export const MessagesPage = ({ user, onLogout }: MessagesPageProps) => {
       console.error("Failed to load users:", error);
     } finally {
       setLoadingUsers(false);
+    }
+  };
+  
+
+  // USER CHECKER TROFEL
+  useEffect(() => {
+    const checkNewUsers = async () => {
+      try {
+        const data = await apiService.getUsers();
+ 
+        if (data.length !== users.length) { 
+          setUsers(data);
+        }
+      } catch (error) {
+        console.error(
+          "Erreur lors de la vérification des utilisateurs:",
+          error
+        );
+      }
+    };
+ 
+    const intervalUsers = setInterval(checkNewUsers, 3000);
+    return () => clearInterval(intervalUsers);
+  }, [users]);  
+ 
+  // MESSAGE CHECKER TROFEL
+  useEffect(() => { 
+    if (!selectedUserId) return; 
+    const checkNewMessages = async () => {
+      try {
+        const data = await apiService.getChats(); 
+        const relevantMessages = data.filter(
+          (msg) =>
+            (msg.senderUserId === user.idUser &&
+              msg.receiverUserId === selectedUserId) ||
+            (msg.senderUserId === selectedUserId &&
+              msg.receiverUserId === user.idUser)
+        );
+ 
+        if (relevantMessages.length !== messages.length) { 
+          loadMessages(selectedUserId, user.idUser);
+          setMessages(relevantMessages);
+        }
+      } catch (error) {
+        console.error("Erreur lors de la vérification des messages:", error);
+      }
+    };
+    const intervalMessages = setInterval(checkNewMessages, 2000);
+    return () => clearInterval(intervalMessages);
+  }, [selectedUserId, messages, user.idUser]);  
+
+  // NOUVELLE FONCTION : Charger les modèles AI
+  const loadAIModels = async () => {
+    setLoadingAIModels(true);
+    try {
+      const data = await apiService.getAIModel();
+      setAimodels(data);
+    } catch (error) {
+      console.error("Failed to load AI models:", error);
+    } finally {
+      setLoadingAIModels(false);
     }
   };
 
@@ -112,15 +255,14 @@ export const MessagesPage = ({ user, onLogout }: MessagesPageProps) => {
         user.idUser,
         selectedUserId,
         newMessage,
-        1
+        selectedAimodelIdRef.current
       );
       setMessages((prev) => [...prev, message]);
 
-      // 2. Envoi via WebSocket (JSON complet)
       const wsPayload = JSON.stringify({
         senderId: user.idUser,
-        receiverId: selectedUserId, // Ajout du destinataire
-        content: newMessage
+        receiverId: selectedUserId,
+        content: newMessage,
       });
       apiService.sendWS(wsPayload);
 
@@ -146,7 +288,6 @@ export const MessagesPage = ({ user, onLogout }: MessagesPageProps) => {
 
   const selectedUser = users.find((u) => u.idUser === selectedUserId);
 
-  // Générer une couleur basée sur le username
   const getAvatarColor = (username: string) => {
     const colors = [
       "from-blue-400 to-blue-600",
@@ -172,22 +313,40 @@ export const MessagesPage = ({ user, onLogout }: MessagesPageProps) => {
       <header className="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0 z-10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-              <MessageCircle className="w-5 h-5 text-white" />
+            <div className="w-11 h-11 bg-gradient-to-br from-gray-500 to-red-600 rounded-2xl flex items-center justify-center">
+              <img
+                src="/logoIAO.jpg"
+                alt="Logo"
+                className="w-full h-full object-cover"
+              />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-800">Messagerie</h1>
-              <p className="text-sm text-gray-500">{user.username}</p>
+              {/* capitaliser la 1er lettre de h1 */}
+              <h1 className="text-xl font-bold text-gray-800 capitalize">
+                {user.username}
+              </h1>
+
+              <p className="text-sm text-gray-500">Messagerie</p>
             </div>
           </div>
 
-          <button
-            onClick={() => setShowLogoutModal(true)}
-            className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition"
-          >
-            <LogOut className="w-5 h-5" />
-            <span className="hidden sm:inline">Déconnexion</span>
-          </button>
+          {/* MODIFIÉ : Ajout du sélecteur AI */}
+          <div className="flex items-center gap-3">
+            <AIModelSelector
+              models={aimodels}
+              selectedModelId={selectedAIModelId}
+              onSelectModel={setSelectedAIModelId}
+              loading={loadingAIModels}
+            />
+
+            <button
+              onClick={() => setShowLogoutModal(true)}
+              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="hidden sm:inline">Déconnexion</span>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -226,7 +385,7 @@ export const MessagesPage = ({ user, onLogout }: MessagesPageProps) => {
                   </span>
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-800">
+                  <h2 className="text-lg font-semibold text-gray-800 capitalize">
                     {selectedUser.username}
                   </h2>
                   <p className="text-sm text-green-500">En ligne</p>
@@ -273,6 +432,7 @@ export const MessagesPage = ({ user, onLogout }: MessagesPageProps) => {
                                 isOwn ? "text-blue-100" : "text-gray-500"
                               }`}
                             >
+                              {msg.chatmaj && "Modifié • "}
                               {new Date(msg.created_at).toLocaleTimeString(
                                 "fr-FR",
                                 {
@@ -311,7 +471,6 @@ export const MessagesPage = ({ user, onLogout }: MessagesPageProps) => {
                     ) : (
                       <>
                         <Send className="w-5 h-5" />
-                        {/* <span className="hidden sm:inline">Envoyer</span> */}
                       </>
                     )}
                   </button>
@@ -319,7 +478,6 @@ export const MessagesPage = ({ user, onLogout }: MessagesPageProps) => {
               </div>
             </>
           ) : (
-            // Empty state - no user selected
             <div className="flex-1 flex items-center justify-center bg-gray-50">
               <div className="text-center">
                 <MessageCircle className="w-20 h-20 text-gray-300 mx-auto mb-4" />

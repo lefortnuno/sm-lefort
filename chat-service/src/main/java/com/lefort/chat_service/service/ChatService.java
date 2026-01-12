@@ -86,11 +86,6 @@ public class ChatService {
         chatRepository.deleteById(id);
     }
 
-
-    // ==================================================================
-    // 🔧 MÉTHODES D'ENRICHISSEMENT (users + ai via Feign)
-    // ==================================================================
-
     private Chat enrichChat(Chat chat) {
         if (chat.getSenderUserId() != null) {
             User sender = userOpenFeign.getUserById(chat.getSenderUserId());
