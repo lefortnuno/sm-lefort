@@ -12,6 +12,10 @@ docker exec -it kafka kafka-topics --create --topic user.created --bootstrap-ser
 
 docker exec -it kafka kafka-topics --create --topic chat.created --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
 
+docker exec -it kafka kafka-topics --create --topic grammar.correction.response --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+
+docker exec -it kafka kafka-topics --create --topic grammar.correction.request --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+
 
 ### creation auto des topic 
 spring.kafka.admin.auto-create=true
