@@ -35,5 +35,6 @@ public class AiEventConsumer {
         
         kafkaTemplate.send("grammar.correction.response", response);
         System.out.println("Réponse de correction envoyée pour chat ID: " + request.getChatId());
+        System.out.println("La Réponse etant: " + request);
     }
 }

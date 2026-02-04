@@ -16,31 +16,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime; 
 
+import com.lefort.chat_service.entities.Chat; 
+    
 
 @Service 
-public class ChatEventConsumer {
-
+public class ChatEventConsumer { 
+    
     @Autowired
-    private KafkaTemplate<String, Object> kafkaTemplate;
+    private KafkaTemplate<Long, Object> kafkaTemplate;
+
     
     @Autowired
     private ChatRepository chatRepository;
 
-    @KafkaListener(topics = "chat.created", groupId = "chat-group")
-    public void consume(ChatCreatedEvent event) {
-        System.out.println("Chat recu dans chat-service : " + event);
-
-        // Publier une demande de correction au LLM
-        GrammarCorrectionRequest correctionRequest = new GrammarCorrectionRequest(
-            event.getChatId(),
-            event.getChatcontent()
-        );
-        
-        kafkaTemplate.send("grammar.correction.request", correctionRequest);
-        System.out.println("Demande de correction envoyée pour le chat ID: " + event.getChatId());
-    }
-    
-    @KafkaListener(topics = "grammar.correction.response", groupId = "chat-group")
+    @KafkaListener(topics = "grammar.correction.response", groupId = "chat-group") 
     public void consumeResponse(GrammarCorrectionResponse response) {
         System.out.println("=== RÉSULTAT CORRECTION GRAMMATICALE ===");
         System.out.println("Chat ID: " + response.getChatId());
