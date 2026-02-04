@@ -79,7 +79,7 @@ public class ServiceLLM {
             messages.add(Map.of("role", "user", "content", userPrompt));
             
             requestBody.put("messages", messages);
-            requestBody.put("temperature", 0.1);
+            requestBody.put("temperature", 0.1); 
             requestBody.put("max_tokens", 1000);
 
             // Important: Forcer le format JSON si supporté

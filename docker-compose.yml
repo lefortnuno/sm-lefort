@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
@@ -22,3 +20,138 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  jenkins :
+    image: jenkins/jenkins:lts
+    container_name: "jenkins" 
+    ports:
+      - '8080 :8080'
+      - '443 :8443'
+      - '50000:50000'
+    volumes :
+      - ./jenkins_data: /jenkins_home
+      - ./jenkins : /var/jenkins_config
+
+
+  ms-discovery:
+    build: ./ms-discovery
+    container_name:  discovery-doc
+    ports:
+      - "8761:8761"
+    expose:
+      - "8761"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 4s
+      retries: 10
+
+
+  config-service:
+    build: ./config-service
+    container_name: config-doc
+    ports:
+      - '9999:9999'
+    expose:
+      - '9999'
+    healthcheck:
+      test: [ "CMD","curl","-f", "http://localhost:9999/actuator/health" ]
+      interval: 4s
+      retries: 10
+      start_period: 10s
+    environment:
+      - DISCOVERY_SERVICE_URL=http://discovery-doc:8761/eureka
+    depends_on:
+      ms-discovery:
+        condition: service_healthy
+
+
+
+  user_service:
+    build: ./user-service
+    container_name: user-doc
+    ports:
+      - "7001:7001"
+      - "7001"
+    healthcheck:
+      test: [ "CMD","curl","-f", "http://localhost:7001/actuator/health" ]
+      interval: 4s
+      retries: 10
+      start_period: 15s
+    environment:
+      - DISCOVERY_SERVICE_URL=http://discovery-doc:8761/eureka
+      - CONFIG_SERVICE_URL=http://config-doc:9999
+    depends_on:
+      config-service:
+        condition: service_healthy
+
+ 
+
+
+  chat_service:
+    build: ./chat-service
+    container_name: chat-doc
+    ports:
+      - "7003:7003"
+      - "7003"
+    healthcheck:
+      test: [ "CMD","curl","-f", "http://localhost:7003/actuator/health" ]
+      interval: 4s
+      retries: 10
+      start_period: 20s
+    environment:
+      - DISCOVERY_SERVICE_URL=http://discovery-doc:8761/eureka
+      - CONFIG_SERVICE_URL=http://config-doc:9999
+    depends_on:
+      config-service:
+        condition: service_healthy 
+      user_service:
+        condition: service_healthy
+
+
+  ai_service:
+    build: ./ai-service
+    container_name: ai-doc
+    ports:
+      - "7002:7002"
+      - "7002"
+    healthcheck:
+      test: [ "CMD","curl","-f", "http://localhost:7002/actuator/health" ]
+      interval: 4s
+      retries: 10
+      start_period: 20s
+    environment:
+      - DISCOVERY_SERVICE_URL=http://discovery-doc:8761/eureka
+      - CONFIG_SERVICE_URL=http://config-doc:9999
+    depends_on:
+      config-service:
+        condition: service_healthy
+      user_service:
+        condition: service_healthy
+      chat_service:
+        condition: service_healthy
+
+        
+  ms-gateway:
+    build: ./ms-gateway
+    container_name: gateway-doc
+    ports:
+      - '8085:8085'
+    expose:
+      - '8085'
+    healthcheck:
+      test: [ "CMD","curl","-f", "http://localhost:8085/actuator/health" ]
+      interval: 4s
+      retries: 10
+      start_period: 25s
+    environment:
+      - DISCOVERY_SERVICE_URL=http://discovery-doc:8761/eureka
+    depends_on:
+      ai_service:
+        condition: service_healthy
+
+
+  volumes :
+    jenkins_data:
+      driver: local
+    jenkins:
+      driver: local

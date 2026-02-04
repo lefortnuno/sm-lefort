@@ -1,6 +1,6 @@
 package com.lefort.chat_service.consumer;
 
-import com.lefort.common_events.UserCreatedEvent;
+import com.lefort.chat_service.entities.UserCreatedEvent;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 

@@ -1,6 +1,6 @@
 package com.lefort.user_service.service;
 
-import com.lefort.common_events.UserCreatedEvent;
+import com.lefort.user_service.entities.UserCreatedEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 

@@ -1,7 +1,7 @@
 package com.lefort.ai_service.consumer;
 
-import com.lefort.common_events.GrammarCorrectionRequest;
-import com.lefort.common_events.GrammarCorrectionResponse;
+import com.lefort.ai_service.entities.GrammarCorrectionRequest;
+import com.lefort.ai_service.entities.GrammarCorrectionResponse;
 import com.lefort.ai_service.service.ServiceLLM;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.*;
 
-@Service
+@Service 
 public class AiEventConsumer {
 
     @Autowired

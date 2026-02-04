@@ -5,6 +5,8 @@ import com.lefort.ai_service.service.ServiceLLM;
 import com.lefort.ai_service.repositories.AiRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
+import com.lefort.ai_service.entities.GrammarCorrectionRequest;
+import com.lefort.ai_service.entities.GrammarCorrectionResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.*;
@@ -52,4 +54,5 @@ public class AiController {
         String chatContent = request.get("chatcontent");
         return serviceLLM.corrigerGrammaire(chatContent);
     }
+     
 }

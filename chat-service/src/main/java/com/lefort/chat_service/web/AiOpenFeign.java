@@ -11,6 +11,7 @@ import java.util.List;
 public interface AiOpenFeign {
     @GetMapping("/ais")
     public List<Ai> getAllAis();
+
     @GetMapping("/ais/{id}")
-    public Ai getAiById(@PathVariable("id") Long id);
+    public Ai getAiById(@PathVariable("id") Long id); 
 }

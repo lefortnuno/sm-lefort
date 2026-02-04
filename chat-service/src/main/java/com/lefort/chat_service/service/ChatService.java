@@ -6,7 +6,7 @@ import com.lefort.chat_service.modele.User;
 import com.lefort.chat_service.modele.Ai;
 import com.lefort.chat_service.web.UserOpenFeign;
 import com.lefort.chat_service.web.AiOpenFeign;
-import com.lefort.common_events.ChatCreatedEvent;
+import com.lefort.chat_service.entities.ChatCreatedEvent;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

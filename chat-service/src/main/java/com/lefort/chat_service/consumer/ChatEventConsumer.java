@@ -1,11 +1,11 @@
 package com.lefort.chat_service.consumer;
 
-import com.lefort.common_events.ChatCreatedEvent;
+import com.lefort.chat_service.entities.ChatCreatedEvent;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
  
-import com.lefort.common_events.GrammarCorrectionRequest; 
-import com.lefort.common_events.GrammarCorrectionResponse;
+import com.lefort.chat_service.entities.GrammarCorrectionRequest; 
+import com.lefort.chat_service.entities.GrammarCorrectionResponse;
 import org.springframework.kafka.core.KafkaTemplate; 
 import org.springframework.beans.factory.annotation.Autowired;
  
@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime; 
 
 
-@Service
+@Service 
 public class ChatEventConsumer {
 
     @Autowired
@@ -82,4 +82,5 @@ public class ChatEventConsumer {
             }
         }
     }
+    
 }

@@ -1,6 +1,6 @@
 package com.lefort.chat_service.service;
 
-import com.lefort.common_events.ChatCreatedEvent;
+import com.lefort.chat_service.entities.ChatCreatedEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -15,5 +15,6 @@ public class ChatEventProducer {
 
     public void publishChatCreated(ChatCreatedEvent event) {
         kafkaTemplate.send("chat.created", event.getChatId(), event);
+        System.out.println("Event chat.created envoyé : " + event);
     }
 }

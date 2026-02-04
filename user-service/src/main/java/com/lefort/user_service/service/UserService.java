@@ -2,7 +2,7 @@ package com.lefort.user_service.service;
 
 import com.lefort.user_service.entities.User;
 import com.lefort.user_service.repositories.UserRepository;
-import com.lefort.common_events.UserCreatedEvent;
+import com.lefort.user_service.entities.UserCreatedEvent;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
