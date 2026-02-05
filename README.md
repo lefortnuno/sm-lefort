@@ -102,6 +102,7 @@ docker rm -f user-doc
 docker rm -f chat-doc
 docker rm -f ai-doc
 docker rm -f gateway-doc
+docker rm -f jenkins-doc
 
 ## 2️⃣ Supprimer tous les conteneurs inutilisés
 docker ps -a      # liste tous les conteneurs

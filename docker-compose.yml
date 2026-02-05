@@ -7,6 +7,7 @@ services:
     ports:
       - "2181:2181"
 
+
   kafka:
     image: confluentinc/cp-kafka:7.5.0
     container_name: kafka
@@ -21,16 +22,17 @@ services:
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
-  jenkins :
+
+  jenkins:
     image: jenkins/jenkins:lts
-    container_name: "jenkins" 
+    container_name: "jenkins-doc" 
     ports:
-      - '8080 :8080'
-      - '443 :8443'
-      - '50000:50000'
+      - "8080:8080"
+      - "443:8443"
+      - "50000:50000"
     volumes :
-      - ./jenkins_data: /jenkins_home
-      - ./jenkins : /var/jenkins_config
+      - ./jenkins_data:/jenkins_home
+      - ./jenkins:/var/jenkins_config
 
 
   ms-discovery:
@@ -65,7 +67,6 @@ services:
         condition: service_healthy
 
 
-
   user_service:
     build: ./user-service
     container_name: user-doc
@@ -83,8 +84,6 @@ services:
     depends_on:
       config-service:
         condition: service_healthy
-
- 
 
 
   chat_service:
@@ -150,8 +149,8 @@ services:
         condition: service_healthy
 
 
-  volumes :
-    jenkins_data:
-      driver: local
-    jenkins:
-      driver: local
+volumes:
+  jenkins_data:
+    driver: local
+  jenkins:
+    driver: local
