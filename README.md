@@ -93,9 +93,12 @@ mvn clean install -DskipTests
 
 cd ..
 
+docker compose down -v
+docker compose build --no-cache
 docker compose up -d
 
 ## commande 1️⃣ Supprimer le conteneur existant
+
 docker rm -f discovery-doc
 docker rm -f config-doc
 docker rm -f user-doc
@@ -105,9 +108,10 @@ docker rm -f gateway-doc
 docker rm -f jenkins-doc
 
 ## 2️⃣ Supprimer tous les conteneurs inutilisés
-docker ps -a      # liste tous les conteneurs
-docker rm -f $(docker ps -aq)  # supprime tous les conteneurs
+
+docker ps -a # liste tous les conteneurs
+docker rm -f $(docker ps -aq) # supprime tous les conteneurs
 
 ## logs
-docker logs user-doc
 
+docker logs user-doc

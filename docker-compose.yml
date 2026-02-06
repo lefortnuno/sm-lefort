@@ -7,7 +7,6 @@ services:
     ports:
       - "2181:2181"
 
-
   kafka:
     image: confluentinc/cp-kafka:7.5.0
     container_name: kafka
@@ -18,26 +17,24 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
-
   jenkins:
     image: jenkins/jenkins:lts
-    container_name: "jenkins-doc" 
+    container_name: "jenkins-doc"
     ports:
-      - "8080:8080"
+      - "8081:8081"
       - "443:8443"
       - "50000:50000"
-    volumes :
+    volumes:
       - ./jenkins_data:/jenkins_home
       - ./jenkins:/var/jenkins_config
 
-
   ms-discovery:
     build: ./ms-discovery
-    container_name:  discovery-doc
+    container_name: discovery-doc
     ports:
       - "8761:8761"
     expose:
@@ -47,16 +44,15 @@ services:
       interval: 4s
       retries: 10
 
-
   config-service:
     build: ./config-service
     container_name: config-doc
     ports:
-      - '9999:9999'
+      - "9999:9999"
     expose:
-      - '9999'
+      - "9999"
     healthcheck:
-      test: [ "CMD","curl","-f", "http://localhost:9999/actuator/health" ]
+      test: ["CMD", "curl", "-f", "http://localhost:9999/actuator/health"]
       interval: 4s
       retries: 10
       start_period: 10s
@@ -66,7 +62,6 @@ services:
       ms-discovery:
         condition: service_healthy
 
-
   user_service:
     build: ./user-service
     container_name: user-doc
@@ -74,17 +69,17 @@ services:
       - "7001:7001"
       - "7001"
     healthcheck:
-      test: [ "CMD","curl","-f", "http://localhost:7001/actuator/health" ]
+      test: ["CMD", "curl", "-f", "http://localhost:7001/actuator/health"]
       interval: 4s
       retries: 10
       start_period: 15s
     environment:
       - DISCOVERY_SERVICE_URL=http://discovery-doc:8761/eureka
       - CONFIG_SERVICE_URL=http://config-doc:9999
+      - KAFKA_SERVICE_URL=kafka:9092
     depends_on:
       config-service:
         condition: service_healthy
-
 
   chat_service:
     build: ./chat-service
@@ -93,19 +88,19 @@ services:
       - "7003:7003"
       - "7003"
     healthcheck:
-      test: [ "CMD","curl","-f", "http://localhost:7003/actuator/health" ]
+      test: ["CMD", "curl", "-f", "http://localhost:7003/actuator/health"]
       interval: 4s
       retries: 10
       start_period: 20s
     environment:
       - DISCOVERY_SERVICE_URL=http://discovery-doc:8761/eureka
       - CONFIG_SERVICE_URL=http://config-doc:9999
+      - KAFKA_SERVICE_URL=kafka:9092
     depends_on:
       config-service:
-        condition: service_healthy 
+        condition: service_healthy
       user_service:
         condition: service_healthy
-
 
   ai_service:
     build: ./ai-service
@@ -114,13 +109,14 @@ services:
       - "7002:7002"
       - "7002"
     healthcheck:
-      test: [ "CMD","curl","-f", "http://localhost:7002/actuator/health" ]
+      test: ["CMD", "curl", "-f", "http://localhost:7002/actuator/health"]
       interval: 4s
       retries: 10
       start_period: 20s
     environment:
       - DISCOVERY_SERVICE_URL=http://discovery-doc:8761/eureka
       - CONFIG_SERVICE_URL=http://config-doc:9999
+      - KAFKA_SERVICE_URL=kafka:9092
     depends_on:
       config-service:
         condition: service_healthy
@@ -129,25 +125,34 @@ services:
       chat_service:
         condition: service_healthy
 
-        
   ms-gateway:
     build: ./ms-gateway
     container_name: gateway-doc
     ports:
-      - '8085:8085'
+      - "8085:8085"
     expose:
-      - '8085'
+      - "8085"
     healthcheck:
-      test: [ "CMD","curl","-f", "http://localhost:8085/actuator/health" ]
+      test: ["CMD", "curl", "-f", "http://localhost:8085/actuator/health"]
       interval: 4s
       retries: 10
       start_period: 25s
     environment:
       - DISCOVERY_SERVICE_URL=http://discovery-doc:8761/eureka
+      - KEYCLOCK_SERVICE_URL=http://192.168.0.168:8080/realms/lefort-realm
+      - KEYCLOCK_SERVICE_JWT_URL=http://192.168.0.168:8080/realms/lefort-realm/protocol/openid-connect/certs
     depends_on:
       ai_service:
         condition: service_healthy
 
+  frontend:
+    build: ./frontend
+    container_name: react-doc
+    ports:
+      - "5173:80"
+    # depends_on:
+    #   ms-gateway:
+    #     condition: service_healthy
 
 volumes:
   jenkins_data:
